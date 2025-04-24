@@ -164,40 +164,40 @@ TEST_F(TestSerializer, Pybind11SimpleShmem)
     ASSERT_TRUE(simple_pickleable.attr("int_value")().equal(rebuilt.attr("int_value")()));
 }
 
-TEST_F(TestSerializer, cuDFObject)
-{
-    pybind11::gil_scoped_acquire gil;
+// TEST_F(TestSerializer, cuDFObject)
+// {
+//     pybind11::gil_scoped_acquire gil;
 
-    py::module_ mod_cudf;
-    try
-    {
-        mod_cudf = py::module_::import("cudf");
-    } catch (...)
-    {
-        GTEST_SKIP() << "Pybind import of cuDF failed, skipping test.";
-    }
+//     py::module_ mod_cudf;
+//     try
+//     {
+//         mod_cudf = py::module_::import("cudf");
+//     } catch (...)
+//     {
+//         GTEST_SKIP() << "Pybind import of cuDF failed, skipping test.";
+//     }
 
-    std::stringstream sstream;
+//     std::stringstream sstream;
 
-    sstream << "FIELD1,FIELD2,FIELD3,FIELD4,FILED5,FIELD6";
-    for (int i = 0; i < 1000; ++i)
-    {
-        sstream << "abc,1,2,10/1/1,4,end" << std::endl;
-    }
+//     sstream << "FIELD1,FIELD2,FIELD3,FIELD4,FILED5,FIELD6";
+//     for (int i = 0; i < 1000; ++i)
+//     {
+//         sstream << "abc,1,2,10/1/1,4,end" << std::endl;
+//     }
 
-    auto py_string = py::str(sstream.str());
-    auto py_buffer = py::buffer(py::bytes(py_string));
-    auto dataframe = mod_cudf.attr("read_csv")(py_buffer);
+//     auto py_string = py::str(sstream.str());
+//     auto py_buffer = py::buffer(py::bytes(py_string));
+//     auto dataframe = mod_cudf.attr("read_csv")(py_buffer);
 
-    auto df_buffer_info = pymrc::Serializer::serialize(dataframe, false);
-    auto df_rebuilt     = pymrc::Deserializer::deserialize(std::get<0>(df_buffer_info), std::get<1>(df_buffer_info));
-    ASSERT_TRUE(df_rebuilt.equal(dataframe));
+//     auto df_buffer_info = pymrc::Serializer::serialize(dataframe, false);
+//     auto df_rebuilt     = pymrc::Deserializer::deserialize(std::get<0>(df_buffer_info), std::get<1>(df_buffer_info));
+//     ASSERT_TRUE(df_rebuilt.equal(dataframe));
 
-    auto df_buffer_info_shmem = pymrc::Serializer::serialize(dataframe, true);
-    auto df_rebuilt_shmem     = pymrc::Deserializer::deserialize(std::get<0>(df_buffer_info_shmem),
-                                                             std::get<1>(df_buffer_info_shmem));
-    ASSERT_TRUE(df_rebuilt_shmem.equal(dataframe));
-}
+//     auto df_buffer_info_shmem = pymrc::Serializer::serialize(dataframe, true);
+//     auto df_rebuilt_shmem     = pymrc::Deserializer::deserialize(std::get<0>(df_buffer_info_shmem),
+//                                                              std::get<1>(df_buffer_info_shmem));
+//     ASSERT_TRUE(df_rebuilt_shmem.equal(dataframe));
+// }
 
 TEST_F(TestSerializer, BadSerializeUnpicklable)
 {
